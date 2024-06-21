@@ -90,6 +90,27 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Disable netrw for the nvim-tree plugin
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.opt.termguicolors = true
+
+-- Relative Numbers
+vim.opt.relativenumber = true
+
+-- Reference Column
+vim.opt.colorcolumn = '80'
+
+-- Tab
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
+
+-- No Swap file
+vim.opt.swapfile = false
+vim.opt.backup = false
+
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = false
 
@@ -116,7 +137,10 @@ vim.opt.showmode = false
 vim.opt.clipboard = 'unnamedplus'
 
 -- Enable break indent
-vim.opt.breakindent = true
+-- vim.opt.breakindent = true
+
+-- Should not wrap lines
+vim.opt.wrap = false
 
 -- Save undo history
 vim.opt.undofile = true
@@ -227,6 +251,23 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+
+  -- Side Tree view
+  {
+    'nvim-tree/nvim-tree.lua',
+    config = function(self, opts)
+      require('nvim-tree').setup()
+    end,
+  },
+
+  -- Be able to between tmux panels
+  'christoomey/vim-tmux-navigator',
+
+  -- C-u and C-W now scrool insted of jump
+  'psliwka/vim-smoothie',
+
+  -- Git integration
+  'tpope/vim-fugitive',
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -368,7 +409,7 @@ require('lazy').setup({
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>pf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
@@ -376,6 +417,12 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+
+      -- CUSTOM
+      vim.keymap.set('n', '<leader>ps', function()
+        builtin.grep_string { search = vim.fn.input 'Grep > ' }
+      end)
+      -- END CUSTOM
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -810,9 +857,9 @@ require('lazy').setup({
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = { 'ruby', 'python' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'python' } },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -848,6 +895,79 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   -- { import = 'custom.plugins' },
+  --
+
+  -- THEME
+  'sainnhe/sonokai',
+
+  -- HARPOON
+  {
+    'theprimeagen/harpoon',
+    branch = 'harpoon2',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require('harpoon'):setup()
+    end,
+    keys = {
+      {
+        '<leader>A',
+        function()
+          require('harpoon'):list():add()
+        end,
+        desc = 'harpoon file',
+      },
+      {
+        '<leader>a',
+        function()
+          local harpoon = require 'harpoon'
+          harpoon.ui:toggle_quick_menu(harpoon:list())
+        end,
+        desc = 'harpoon quick menu',
+      },
+      {
+        '<leader>h',
+        function()
+          require('harpoon'):list():select(1)
+        end,
+        desc = 'harpoon to file 1',
+      },
+      {
+        '<leader>j',
+        function()
+          require('harpoon'):list():select(2)
+        end,
+        desc = 'harpoon to file 2',
+      },
+      {
+        '<leader>k',
+        function()
+          require('harpoon'):list():select(3)
+        end,
+        desc = 'harpoon to file 3',
+      },
+      {
+        '<leader>l',
+        function()
+          require('harpoon'):list():select(4)
+        end,
+        desc = 'harpoon to file 4',
+      },
+      {
+        '<leader>p',
+        function()
+          require('harpoon'):list():prev()
+        end,
+        desc = 'harpoon to previous',
+      },
+      {
+        '<leader>n',
+        function()
+          require('harpoon'):list():next()
+        end,
+        desc = 'harpoon to next',
+      },
+    },
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -870,5 +990,119 @@ require('lazy').setup({
   },
 })
 
+-- REQUIRED
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- THEME
+vim.g.sonokai_style = 'andromeda'
+vim.g.sonokai_style_better_perfomance = 1
+vim.g.sonokai_transparent_background = 1
+
+vim.cmd 'colorscheme sonokai'
+
+-- MY REMAPS
+
+vim.keymap.set('n', '<leader>e', vim.cmd.NvimTreeToggle)
+
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+
+vim.keymap.set('n', 'J', 'mzJ`z')
+
+vim.keymap.set('n', '<C-d>', '<C-d>zz')
+vim.keymap.set('n', '<C-u>', '<C-u>zz')
+
+vim.keymap.set('n', 'n', 'nzzzv')
+vim.keymap.set('n', 'N', 'Nzzzv')
+
+vim.keymap.set('n', '<leader>ta', function()
+  FindAndCloseTerminalBuffer()
+  local command = '<C-w>v<C-w>l :terminal go test ./... <CR>'
+  vim.cmd("let @t = '" .. command .. "'")
+  return command
+end, { expr = true })
+
+vim.keymap.set('n', '<leader>t!', function()
+  FindAndCloseTerminalBuffer()
+  return vim.fn.getreg 't'
+end, { expr = true })
+
+vim.keymap.set('n', '<leader>tp', function()
+  FindAndCloseTerminalBuffer()
+  local command = '<C-w>v :te go test ./' .. vim.fn.expand '%:h' .. '/<CR>'
+  vim.cmd("let @t = '" .. command .. "'")
+  return command
+end, { expr = true })
+
+vim.keymap.set('n', '<leader>tvp', function()
+  FindAndCloseTerminalBuffer()
+  local command = '<C-w>v :te go test -v ./' .. vim.fn.expand '%:h' .. '/<CR>'
+  vim.cmd("let @t = '" .. command .. "'")
+  return command
+end, { expr = true })
+
+vim.keymap.set('n', '<leader>tt', function()
+  WriteToTestNameRegister()
+  local testName = vim.fn.expand '<cword>'
+
+  local command = '<C-w>v :te go test ./' .. vim.fn.expand '%:h' .. '/ -run ^' .. testName .. '$<CR>'
+  vim.cmd("let @t = '" .. command .. "'")
+  return command
+end, { expr = true })
+
+vim.keymap.set('n', '<leader>tvt', function()
+  WriteToTestNameRegister()
+  local testName = vim.fn.expand '<cword>'
+
+  local command = '<C-w>v :te go test ./' .. vim.fn.expand '%:h' .. '/ -v -run ^' .. testName .. '$<CR>'
+  vim.cmd("let @t = '" .. command .. "'")
+  return command
+end, { expr = true })
+
+vim.keymap.set('n', '<leader>T', '<C-w>v :te <CR>')
+
+vim.keymap.set({ 'n', 'v' }, '<leader>p', '"_dP')
+
+vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]])
+vim.keymap.set({ 'n', 'v' }, '<leader>y', '"+y')
+vim.keymap.set('n', '<leader>Y', [["*Y]])
+
+vim.keymap.set({ 'n', 'v' }, '<leader>ud', "\"=system(['node', '../../helpers/uuidV6/index.js'])<CR>p")
+
+vim.keymap.set('n', '<leader><C-w>l', '25<C-w>>')
+vim.keymap.set('n', '<leader><C-w>h', '25<C-w><')
+
+vim.keymap.set('n', '<leader>%', '<S-v>$%')
+vim.keymap.set('v', '<leader>%', '$%')
+vim.keymap.set('n', '<leader>}', '<S-v>}')
+vim.keymap.set('n', '<leader>{', '<S-v>{')
+
+vim.keymap.set('n', '<leader>c', '^<C-v>$%<S-i>//<Esc>0')
+vim.keymap.set('n', '<leader>C', '^<C-v>$%h<Del><Esc>0')
+
+function WriteToTestNameRegister()
+  return vim.fn.expand '<cword>'
+end
+
+function FindAndCloseTerminalBuffer()
+  local terminalBuf = vim.fn.execute ':buffers aF'
+  if terminalBuf == '' then
+    return
+  end
+
+  local buffNum = tonumber(terminalBuf:match '^%s*(%d+)')
+  if buffNum ~= -1 then
+    vim.api.nvim_buf_delete(buffNum, { force = true })
+  end
+end
+
+-- terminal remaps
+vim.keymap.set('t', '<ESC>', '<C-\\><C-n>', { noremap = true })
+
+-- Git Fugitive remaps
+vim.keymap.set('n', '<leader>gs', vim.cmd.Git)
+
+-- Smoothie remaps
+vim.keymap.set({ 'n', 'v', 'x' }, '<C-d>', '<cmd>call smoothie#do("<C-D>") <CR>')
+vim.keymap.set({ 'n', 'v', 'x' }, '<C-u>', '<cmd>call smoothie#do("<C-U>") <CR>')
