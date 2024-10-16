@@ -11,7 +11,7 @@ vim.keymap.set('n', '<leader>E', vim.diagnostic.open_float, { desc = 'Show diagn
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -47,48 +47,28 @@ vim.keymap.set('n', 'n', 'nzzzv')
 vim.keymap.set('n', 'N', 'Nzzzv')
 
 vim.keymap.set('n', '<leader>ta', function()
-  FindAndCloseTerminalBuffer()
-  local command = '<C-w>v<C-w>l :terminal go test ./... <CR>'
-  vim.cmd("let @t = '" .. command .. "'")
-  return command
-end, { expr = true })
+  RunAndRegisterTest ':te go test ./...'
+end)
 
 vim.keymap.set('n', '<leader>t!', function()
-  FindAndCloseTerminalBuffer()
-  return vim.fn.getreg 't'
-end, { expr = true })
+  RunAndRegisterTest(vim.fn.getreg 't')
+end)
 
 vim.keymap.set('n', '<leader>tp', function()
-  FindAndCloseTerminalBuffer()
-  local command = '<C-w>v :te go test ./' .. vim.fn.expand '%:h' .. '/<CR>'
-  vim.cmd("let @t = '" .. command .. "'")
-  return command
-end, { expr = true })
+  RunAndRegisterTest(':te go test ./' .. vim.fn.expand '%:h')
+end)
 
 vim.keymap.set('n', '<leader>tvp', function()
-  FindAndCloseTerminalBuffer()
-  local command = '<C-w>v :te go test -v ./' .. vim.fn.expand '%:h' .. '/<CR>'
-  vim.cmd("let @t = '" .. command .. "'")
-  return command
-end, { expr = true })
+  RunAndRegisterTest(':te go test -v ./' .. vim.fn.expand '%:h')
+end)
 
 vim.keymap.set('n', '<leader>tt', function()
-  WriteToTestNameRegister()
-  local testName = vim.fn.expand '<cword>'
-
-  local command = '<C-w>v :te go test ./' .. vim.fn.expand '%:h' .. '/ -run ^' .. testName .. '$<CR>'
-  vim.cmd("let @t = '" .. command .. "'")
-  return command
-end, { expr = true })
+  RunAndRegisterTest(':te go test ./' .. vim.fn.expand '%:h' .. '/ -run ^' .. vim.fn.expand '<cword>' .. '$')
+end)
 
 vim.keymap.set('n', '<leader>tvt', function()
-  WriteToTestNameRegister()
-  local testName = vim.fn.expand '<cword>'
-
-  local command = '<C-w>v :te go test ./' .. vim.fn.expand '%:h' .. '/ -v -run ^' .. testName .. '$<CR>'
-  vim.cmd("let @t = '" .. command .. "'")
-  return command
-end, { expr = true })
+  RunAndRegisterTest(':te go test ./' .. vim.fn.expand '%:h' .. '/ -v -run ^' .. vim.fn.expand '<cword>' .. '$')
+end)
 
 vim.keymap.set('n', '<leader>T', '<C-w>v :te <CR>')
 
@@ -99,8 +79,11 @@ vim.keymap.set('v', '<leader>%', '$%')
 vim.keymap.set('n', '<leader>}', '<S-v>}')
 vim.keymap.set('n', '<leader>{', '<S-v>{')
 
-function WriteToTestNameRegister()
-  return vim.fn.expand '<cword>'
+function RunAndRegisterTest(command)
+  FindAndCloseTerminalBuffer()
+  vim.cmd("let @t = '" .. command .. "'")
+  vim.cmd ':vne'
+  vim.cmd(command)
 end
 
 function FindAndCloseTerminalBuffer()
@@ -109,9 +92,9 @@ function FindAndCloseTerminalBuffer()
     return
   end
 
-  local buffNum = tonumber(terminalBuf:match '^%s*(%d+)')
-  if buffNum ~= -1 then
-    vim.api.nvim_buf_delete(buffNum, { force = true })
+  local buffNums = terminalBuf:match '^%s*(%d+)'
+  if buffNums ~= -1 then
+    vim.cmd(':' .. buffNums .. 'bd')
   end
 end
 
