@@ -71,6 +71,12 @@ vim.keymap.set('n', '<leader>tvt', function()
   RunAndRegisterTest(':te go test ./' .. vim.fn.expand '%:h' .. '/ -v -run ^' .. vim.fn.expand '<cword>' .. '$')
 end)
 
+vim.keymap.set('n', '<leader>jf', function()
+  local unformattedJson = vim.trim(vim.fn.getreg '"')
+  vim.fn.setreg('j', vim.fn.system('echo ' .. unformattedJson .. ' | jq'))
+  vim.cmd 'new temp.json | put=@j'
+end)
+
 vim.keymap.set('n', '<leader>T', '<C-w>v :te <CR>')
 
 vim.keymap.set({ 'n', 'v' }, '<leader>ud', "\"=system(['node', '../../helpers/uuidV6/index.js'])<CR>p")
@@ -81,6 +87,13 @@ vim.keymap.set('n', '<leader>}', '<S-v>}')
 vim.keymap.set('n', '<leader>{', '<S-v>{')
 
 function RunAndRegisterTest(command)
+  FindAndCloseTerminalBuffer()
+  vim.cmd("let @t = '" .. command .. "'")
+  vim.cmd ':vne'
+  vim.cmd(command)
+end
+
+function FormatJson(command)
   FindAndCloseTerminalBuffer()
   vim.cmd("let @t = '" .. command .. "'")
   vim.cmd ':vne'
